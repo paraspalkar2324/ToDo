@@ -1,6 +1,8 @@
+import time
 from pywebio import start_server
-from pywebio.input import input, select, actions
-from pywebio.output import put_text, put_buttons, put_table, put_markdown, put_success, put_warning, put_error
+from pywebio.input import input, select
+from pywebio.output import put_text, put_buttons, put_table, put_markdown, put_success, put_warning, put_error, put_processbar, set_processbar, clear
+
 import sqlite3
 
 # Database Setup
@@ -84,11 +86,20 @@ def view_tasks():
         return
 
     table_data = [["ID", "Task", "Time", "Note", "Status"]]
+    completed_tasks = sum(1 for t in tasks if t[4] == 1)
+    total_tasks = len(tasks)
+    progress = (completed_tasks / total_tasks) if total_tasks > 0 else 0  # Value between 0 and 1
+
     for t in tasks:
         status = "✔ Done" if t[4] else "❌ Pending"
         table_data.append([t[0], t[1], t[2], t[3], status])
 
     put_table(table_data)
+
+    # Display Progress Bar
+    put_text(f"Task Completion Progress: {int(progress * 100)}%")
+    put_processbar("progress_bar")
+    set_processbar("progress_bar", progress)  # Set progress dynamically
 
 
 def mark_done():
@@ -109,9 +120,33 @@ def delete_task():
     put_success("Task deleted successfully! 🗑️")
 
 
+def focus_timer():
+    cursor.execute("SELECT id, task FROM tasks WHERE user_id = ? AND done = 0", (current_user,))
+    tasks = cursor.fetchall()
+
+    if not tasks:
+        put_warning("No pending tasks found! Add a task first.")
+        return
+
+    task_options = {str(t[0]): t[1] for t in tasks}
+    task_id = select("Select a task to focus on:", list(task_options.keys()))
+    selected_task = task_options[task_id]
+
+    duration = select("Select focus time (seconds):", [30, 60, 120, 300])
+
+    put_markdown(f"## 🧘‍♂️ Focusing on: **{selected_task}** for {duration} seconds!")
+    put_processbar("focus_progress")
+
+    for i in range(duration):
+        set_processbar("focus_progress", (i + 1) / duration)
+        time.sleep(1)  # Simulating the timer countdown
+
+    put_success(f"Great job! You focused on **{selected_task}** for {duration} seconds. 🎉")
+
+
 def task_menu():
     while True:
-        choice = select("Choose an action:", ["Add Task", "View Tasks", "Mark Task Done", "Delete Task", "Logout"])
+        choice = select("Choose an action:", ["Add Task", "View Tasks", "Mark Task Done", "Delete Task", "Focus Timer", "Logout"])
         if choice == "Add Task":
             add_task()
         elif choice == "View Tasks":
@@ -120,6 +155,8 @@ def task_menu():
             mark_done()
         elif choice == "Delete Task":
             delete_task()
+        elif choice == "Focus Timer":
+            focus_timer()
         elif choice == "Logout":
             put_warning("Logged out successfully!")
             break
@@ -139,3 +176,4 @@ def main():
 
 if __name__ == "__main__":
     start_server(main, port=8080, debug=True)
+
