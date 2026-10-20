@@ -1,22 +1,35 @@
->Planner App - PyWebIO
-A simple task planner built using Python and PyWebIO, featuring user authentication, task management, and a clean UI – all running in a web browser without HTML/CSS! 
+# Planner App - PyWebIO
 
-> Features
-1. Sign Up / Log In (User authentication with SQLite)
-2. Task Management (Add, View, Mark as Done, Delete tasks)
-3. Interactive UI (PyWebIO elements like tables, buttons, and markdown)
-4. Stores Data Persistently (Tasks and users are saved in SQLite)
-5. Runs in a Web Browser (No need for frontend code!)
-   
-> Project Structure
- planner-app/
-│-- app.py                 # Main application script  
-│-- planner.db             # SQLite database (generated after first run)  
-│-- README.md              # Project documentation  
+A simple task planner built with Python, PyWebIO, and SQLite.
 
-> Usage
-1. Sign Up with a username & password
-2. Log In to manage your tasks
-3. Add Tasks with a time and optional note
-4. View Tasks in a neat table format
-5. Mark Done or Delete tasks easily
+## Features
+- User Sign Up and Login
+- Add, View, Complete, and Delete Tasks
+- Task Time and Notes
+- Task Completion Progress Bar
+- Focus Timer
+- SQLite Database for Persistent Storage
+
+## Technologies
+Python · PyWebIO · SQLite
+
+## Installation
+```bash
+pip install pywebio
+python app.py
+```
+
+Open `http://localhost:8080` in your browser.
+
+## Project Structure
+```text
+planner-app/
+├── app.py
+├── README.md
+└── planner.db  (generated automatically)
+```
+
+## Future Improvements
+- Task Priority and Deadlines
+- Task Search and Filtering
+- Improved Password Security
