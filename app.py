@@ -101,7 +101,26 @@ def view_tasks():
     put_processbar("progress_bar")
     set_processbar("progress_bar", progress)  # Set progress dynamically
 
+def search_tasks():
+    keyword = input("Enter task name to search:")
 
+    cursor.execute(
+        """SELECT id, task, time, note, done
+           FROM tasks
+           WHERE user_id = ? AND task LIKE ?""",
+        (current_user, f"%{keyword}%")
+    )
+    tasks = cursor.fetchall()
+
+    if tasks:
+        put_table(
+            [["ID", "Task", "Time", "Note", "Status"]] +
+            [[t[0], t[1], t[2], t[3],
+              "Done" if t[4] else "Pending"] for t in tasks]
+        )
+    else:
+        put_warning("No matching tasks found!")
+        
 def mark_done():
     view_tasks()
     task_id = input("Enter Task ID to mark as done:")
@@ -144,13 +163,28 @@ def focus_timer():
     put_success(f"Great job! You focused on **{selected_task}** for {duration} seconds. 🎉")
 
 
+
 def task_menu():
     while True:
-        choice = select("Choose an action:", ["Add Task", "View Tasks", "Mark Task Done", "Delete Task", "Focus Timer", "Logout"])
+        choice = select(
+            "Choose an action:",
+            [
+                "Add Task",
+                "View Tasks",
+                "Search Tasks",
+                "Mark Task Done",
+                "Delete Task",
+                "Focus Timer",
+                "Logout"
+            ]
+        )
+
         if choice == "Add Task":
             add_task()
         elif choice == "View Tasks":
             view_tasks()
+        elif choice == "Search Tasks":
+            search_tasks()
         elif choice == "Mark Task Done":
             mark_done()
         elif choice == "Delete Task":
@@ -160,6 +194,7 @@ def task_menu():
         elif choice == "Logout":
             put_warning("Logged out successfully!")
             break
+
 
 
 def main():
